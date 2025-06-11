@@ -1,35 +1,80 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+A conviniënt widget that helps you separate UI from Logic, using ChangeNotifiers.
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+## Goal
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+The aim for this package is provide a simple way of separating UI from Logic while maintaining the simplicity of StatefulWidget.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+In general, a StatefulWidget is structured with both the Widget and the State in the same file. The function that builds the UI is located inside the State.
 
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+ListenableWidget 'fixes' this by having you to override a buildView method which passes the ViewModel.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+This package is designed to fullfill the VVM of MVVM, where the ListenableWidget is the View and the ChangeNotifier serves as the ViewModel.
+
+A typical implementation will exist of two parts:
+
+### ViewModel
+
+We start with creating our ViewModel which must be a ChangeNotifier. Whenever we call notifyListeners(), the ListenableWidget will rebuild.
 
 ```dart
-const like = 'sample';
+class CounterViewModel with ChangeNotifier {
+    // While it's not required, using the private + public getter combo
+    // prevents consumers from accidently circumventing any notifyListeners.
+    int _count = 0;
+    int get count => _count;
+
+    void increment() {
+        _count++;
+        notifyListeners();
+    }
+}
+```
+
+### View
+
+Next we can create our View. We do this by extending ListenableWidget and override at least the two required methods, create and buildView:
+
+```dart
+class CounterView extends ListenableWidget<CounterViewModel> {
+
+    CounterViewModel create(context) {
+        return CounterViewModel();
+    }
+
+    void buildView(context, viewModel) {
+        return Scaffold(
+            // imagine beautiful UI here
+            Text(viewModel.count)
+            // imagine beautiful UI here
+            IncrementButton( onPressed: viewModel.increment),
+            // imagine beautiful UI here
+        );
+    }
+}
+```
+
+## Methods overview
+
+The ListenableWidget has three methods of which two are required.
+
+### create (required)
+
+Whenever you extend ListenableWidget, you must override `create` to provide the `Widget` with a `ViewModel`. This will only be called once, when the `Widget` is created.
+
+Often you will use this to create a new instance of the `ViewModel` but it's also possible to provide an already existing `ViewModel`, like when you want to share state between pages.
+
+```dart
+// Example of creating a new instance
+MyViewModel create(BuildContext context) {
+    return MyViewModel(initialValue);
+}
+
+// Example of getting an existing ViewModel using Provider
+MyViewModel create(BuildContext context) {
+    return context.read<MyViewModel>();
+}
 ```
 
 ## Additional information
