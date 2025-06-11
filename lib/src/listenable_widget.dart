@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-abstract class ViewWidget<T extends ChangeNotifier> extends StatefulWidget {
-  const ViewWidget({super.key});
+abstract class ListenableWidget<T extends ChangeNotifier>
+    extends StatefulWidget {
+  const ListenableWidget({super.key});
 
   /// Used to create the [ViewModel] instance.
   T create(BuildContext context);
@@ -16,10 +17,11 @@ abstract class ViewWidget<T extends ChangeNotifier> extends StatefulWidget {
   FutureOr<void> update(T viewModel) async {}
 
   @override
-  State<ViewWidget> createState() => _ViewWidgetState<T>();
+  State<ListenableWidget> createState() => _ListenableWidgetState<T>();
 }
 
-class _ViewWidgetState<T extends ChangeNotifier> extends State<ViewWidget<T>> {
+class _ListenableWidgetState<T extends ChangeNotifier>
+    extends State<ListenableWidget<T>> {
   late final T viewModel;
 
   @override
@@ -29,7 +31,7 @@ class _ViewWidgetState<T extends ChangeNotifier> extends State<ViewWidget<T>> {
   }
 
   @override
-  void didUpdateWidget(covariant ViewWidget<T> oldWidget) {
+  void didUpdateWidget(covariant ListenableWidget<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     widget.update(viewModel);
   }
