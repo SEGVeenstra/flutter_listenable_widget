@@ -24,6 +24,8 @@ class CounterPage extends ListenableWidget<CounterPageViewModel> {
   }
 
   @override
+  // This can be set to false if you don't want the ViewModel to be disposed when the widget is disposed.
+  // This could be useful if the ViewModel is create globally, or provided by a dependency injection framework.
   final autoDispose = true;
 
   @override
