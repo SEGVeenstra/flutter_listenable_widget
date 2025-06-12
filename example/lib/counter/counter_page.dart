@@ -17,14 +17,17 @@ class CounterPage extends ListenableWidget<CounterPageViewModel> {
   }
 
   @override
-  FutureOr<void> update(CounterPageViewModel viewModel) {
+  FutureOr<void> update(_, _, CounterPageViewModel viewModel) {
     // This method is called whenever the widget is updated.
     // So when a field on the Widget is updated, you should use this method to update the ViewModel.
     viewModel.setIncrementValue(incrementValue);
   }
 
   @override
-  Widget buildView(BuildContext context, CounterPageViewModel viewModel) {
+  final autoDispose = true;
+
+  @override
+  Widget build(BuildContext context, CounterPageViewModel viewModel) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
