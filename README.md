@@ -154,3 +154,5 @@ This package is aimes for simplicity and that's why you don't find certain thing
 If you wish to optimize rebuilds, it's up to you to do so by calling `notifyListeners()` strategically.
 
 In general, you'd want `ListenableWidget` to instantiate it's own `ViewModel`. For more complex scenarios where you wish to share `ViewModels` you will have to manage that yourself, for example by using [Provider](https://pub.dev/packages/provider).
+
+This package has ironically been born from the desire to __not__ use a package for state management. So if you don't want to rely on a package either, you can also just copy [listenable_widget.dart](https://github.com/SEGVeenstra/flutter_listenable_widget/blob/master/lib/src/listenable_widget.dart) into your project.
