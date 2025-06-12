@@ -36,7 +36,7 @@ class CounterViewModel with ChangeNotifier {
 
 ### View
 
-Next we can create our View. We do this by extending ListenableWidget and override at least the two required methods, create and buildView:
+Next we can create our View. We do this by extending `ListenableWidget` and override at least the two required methods, `create` and `build`:
 
 ```dart
 class CounterView extends ListenableWidget<CounterViewModel> {
@@ -47,7 +47,7 @@ class CounterView extends ListenableWidget<CounterViewModel> {
     }
 
     @override
-    void buildView(context, viewModel) {
+    void build(context, viewModel) {
         return Scaffold(
             // imagine beautiful UI here
             Text(viewModel.count)
@@ -61,11 +61,11 @@ class CounterView extends ListenableWidget<CounterViewModel> {
 
 ## Methods overview
 
-The ListenableWidget has three methods of which two are required.
+The `ListenableWidget` has three methods of which two are required.
 
 ### create (required)
 
-Whenever you extend ListenableWidget, you must override `create` to provide the `Widget` with a `ViewModel`. This will only be called once, when the `Widget` is created.
+Whenever you extend `ListenableWidget`, you must override `create` to provide a `ViewModel`. This will only be called once, when the `Widget` is created.
 
 Often you will use this to create a new instance of the `ViewModel` but it's also possible to provide an already existing `ViewModel`, like when you want to share state between pages.
 
@@ -87,7 +87,7 @@ MyViewModel create(BuildContext context) {
 
 The other required method to override is `build`. The `build` method should return your UI. It works similar to the `build` method you're used to from `StatelessWidget` and `StatefulWidget`, but has one extra argument which is the `ViewModel`.
 
-The `build` method will be called every time the `notifyListeners()` is called on the `ViewModel`.
+The `build` method will be called every time `notifyListeners()` is called on the `ViewModel`.
 
 ```dart
 @override
@@ -101,20 +101,26 @@ Widget build(context, viewModel) {
 
 ### update (optional)
 
-The `update` method is called whenever the `Widget` is updated. Because the `ViewModel` only gets created once, you can use `update` to update the `ViewModel`. This is useful when your `Widget` has fields that can be update by it's parent.
+The `update` method is called whenever the `Widget` is updated. Because the `ViewModel` only gets created once, you can use `update` to update the `ViewModel`. This is useful when your `Widget` has fields that can be update by its parent and which should be reflected in the `ViewModel`.
 
 ```dart
 class CounterWidget extends ListenableWidget<CounterViewModel> {
+    // The parent passes a counterMode
+    CounterWidget(this.counterMode);
+
     final CounterMode counterMode; 
 
     @override
     CounterViewModel create(context) {
+        // When the Widget is first created, it will use
+        // the counterMode during creation.
         return CounterViewModel(initialCounterMode: counterMode);
     }
 
     @override
     void update(context, oldWidget, viewModel) {
-        // We check if the counterMode has changed, if so,
+        // When the widget is updated by the parent, this is called.
+        // We then check if the counterMode has changed, if so,
         // we update it on the ViewModel.
         if(oldWidget.counterMode != counterMode) {
             viewModel.updateCounterMode(counterMode);
@@ -130,9 +136,9 @@ class CounterWidget extends ListenableWidget<CounterViewModel> {
 
 ## Disposing
 
-By default, `ListenableWidget` will call `dispose` on the `ViewModel` when the `Widget` is disposed. This should be fine in most cases.
+By default, `ListenableWidget` will call `dispose` on the `ViewModel` when the `Widget` is disposed so you can clean-up. This should be fine in most cases.
 
-If you have a `Widget` that does NOT create an instance of the `ViewModel`, but get's it from somewhere else, this most likely means that you DON'T want your `Widget` to dispose the `ViewModel`.
+If you have a `Widget` that does __not__ create an instance of the `ViewModel`, but get's it from somewhere else, this most likely means that you __don't__ want your `Widget` to dispose the `ViewModel` either.
 
 In this case you can simply override the `autoDispose` property on your widget to return false.
 
@@ -143,7 +149,7 @@ final autoDispose = false;
 
 ## Additional information
 
-This package is aimed on simplicity and that's why you don't find certain things you might find in other state management libraries.
+This package is aimes for simplicity and that's why you don't find certain things you might find in other state management libraries.
 
 If you wish to optimize rebuilds, it's up to you to do so by calling `notifyListeners()` strategically.
 
