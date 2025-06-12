@@ -1,7 +1,7 @@
 name: listenable_widget
 description: "A widget that listens to a ChangeNotifier and rebuilds when it changes."
 version: 0.1.0
-homepage: "seg.veenstra.dev"
+homepage: "https://seg.veenstra.dev"
 repository: "https://github.com/SEGVeenstra/flutter_listenable_widget"
 
 environment:
