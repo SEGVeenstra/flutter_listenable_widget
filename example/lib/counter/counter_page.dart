@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:example/counter/counter_page_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:listenable_widget/listenable_widget.dart';
@@ -17,10 +15,19 @@ class CounterPage extends ListenableWidget<CounterPageViewModel> {
   }
 
   @override
-  FutureOr<void> update(_, _, CounterPageViewModel viewModel) {
+  void onWidgetChanged(_, _, CounterPageViewModel viewModel) {
     // This method is called whenever the widget is updated.
     // So when a field on the Widget is updated, you should use this method to update the ViewModel.
     viewModel.setIncrementValue(incrementValue);
+  }
+
+  void onDependenciesChanged(
+    BuildContext context,
+    CounterPageViewModel viewModel,
+  ) {
+    // This method is called whenever the widget's dependencies change.
+    // This can be used to refresh the ViewModel or perform any necessary updates.
+    // For example, if the ViewModel depends on an InheritedWidget, you can use this method to update the ViewModel when the InheritedWidget changes.
   }
 
   @override

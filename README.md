@@ -61,7 +61,7 @@ class CounterView extends ListenableWidget<CounterViewModel> {
 
 ## Methods overview
 
-The `ListenableWidget` has three methods of which two are required.
+The `ListenableWidget` has four methods of which two are required.
 
 ### create (required)
 
@@ -72,13 +72,13 @@ Often you will use this to create a new instance of the `ViewModel` but it's als
 ```dart
 // Example of creating a new instance
 @override
-MyViewModel create(BuildContext context) {
+MyViewModel create(context) {
     return MyViewModel(initialValue);
 }
 
 // Example of getting an existing ViewModel using Provider
 @override
-MyViewModel create(BuildContext context) {
+MyViewModel create(context) {
     return context.read<MyViewModel>();
 }
 ```
@@ -99,9 +99,9 @@ Widget build(context, viewModel) {
 }
 ```
 
-### update (optional)
+### onWidgetChanged (optional)
 
-The `update` method is called whenever the `Widget` is updated. Because the `ViewModel` only gets created once, you can use `update` to update the `ViewModel`. This is useful when your `Widget` has fields that can be update by its parent and which should be reflected in the `ViewModel`.
+The `onWidgetChanged` method is called whenever the `Widget` is updated with a new configuration. Because the `ViewModel` only gets created once, you can use `onWidgetChanged` to update the `ViewModel`. This is useful when your `Widget` has fields that can be updated by its parent and which should be reflected in the `ViewModel`.
 
 ```dart
 class CounterWidget extends ListenableWidget<CounterViewModel> {
@@ -118,7 +118,7 @@ class CounterWidget extends ListenableWidget<CounterViewModel> {
     }
 
     @override
-    void update(context, oldWidget, viewModel) {
+    void onWidgetChanged(context, oldWidget, viewModel) {
         // When the widget is updated by the parent, this is called.
         // We then check if the counterMode has changed, if so,
         // we update it on the ViewModel.
@@ -131,6 +131,19 @@ class CounterWidget extends ListenableWidget<CounterViewModel> {
     Widget build(context, viewModel) {
         // UI
     }
+}
+```
+
+### onDependenciesChanged (optional)
+
+The `onDependenciesChanged` method is called whenever the widget's dependencies change (such as InheritedWidgets). This can be used to update the `ViewModel` or perform any necessary actions when the dependencies change.
+
+```dart
+@override
+void onDependenciesChanged(context, viewModel) {
+    // React to dependency changes
+    final theme = Theme.of(context);
+    viewModel.updateTheme(theme);
 }
 ```
 
