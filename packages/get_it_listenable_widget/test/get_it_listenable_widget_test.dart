@@ -24,6 +24,7 @@ class CounterPage extends GetItListenableWidget<CounterViewModel, int, String> {
     super.instanceName,
     super.getIt,
     super.autoDispose,
+    super.assignContext,
     super.key,
   });
 
@@ -93,6 +94,45 @@ void main() {
 
     await tester.pumpWidget(wrap(const SizedBox.shrink()));
     expect(singleton.isDisposed, isFalse);
+  });
+
+  testWidgets('assigns context for an owned factory VM by default', (
+    tester,
+  ) async {
+    late CounterViewModel created;
+    getIt.registerFactoryParam<CounterViewModel, int, String>((initial, label) {
+      created = CounterViewModel(initial: initial, label: label);
+      return created;
+    });
+
+    await tester.pumpWidget(CounterPage(param1: 1, param2: 'x', getIt: getIt));
+
+    expect(created.context, isNotNull);
+  });
+
+  testWidgets('does not assign context to a shared singleton by default', (
+    tester,
+  ) async {
+    final singleton = CounterViewModel(initial: 3, label: 'shared');
+    getIt.registerSingleton<CounterViewModel>(singleton);
+
+    // autoDispose: false => assignContext defaults to false too.
+    await tester.pumpWidget(CounterPage(getIt: getIt, autoDispose: false));
+
+    expect(singleton.context, isNull);
+  });
+
+  testWidgets('assignContext overrides the autoDispose-derived default', (
+    tester,
+  ) async {
+    final singleton = CounterViewModel(initial: 3, label: 'shared');
+    getIt.registerSingleton<CounterViewModel>(singleton);
+
+    await tester.pumpWidget(
+      CounterPage(getIt: getIt, autoDispose: false, assignContext: true),
+    );
+
+    expect(singleton.context, isNotNull);
   });
 
   testWidgets('honors instanceName', (tester) async {

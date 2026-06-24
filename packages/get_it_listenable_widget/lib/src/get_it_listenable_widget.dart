@@ -53,14 +53,18 @@ abstract class GetItListenableWidget<VM extends ViewModel, P1, P2>
 
   final bool _autoDispose;
 
+  final bool? _assignContext;
+
   const GetItListenableWidget({
     this.param1,
     this.param2,
     this.instanceName,
     this.getIt,
     bool autoDispose = true,
+    bool? assignContext,
     super.key,
-  }) : _autoDispose = autoDispose;
+  })  : _autoDispose = autoDispose,
+        _assignContext = assignContext;
 
   @override
   VM create(BuildContext context) => (getIt ?? GetIt.instance).get<VM>(
@@ -75,4 +79,14 @@ abstract class GetItListenableWidget<VM extends ViewModel, P1, P2>
   /// registrations). Pass `autoDispose: false` for shared singletons.
   @override
   bool get autoDispose => _autoDispose;
+
+  /// Whether the widget assigns its [BuildContext] to [ViewModel.context].
+  ///
+  /// Because GetIt resolves the ViewModel inside [create] (not via the base
+  /// `viewModel` parameter), the default tracks [autoDispose]: a widget-owned
+  /// factory instance gets its context assigned, while a shared singleton
+  /// (`autoDispose: false`) does not — avoiding clobbering the context of
+  /// another widget using the same instance. Pass `assignContext` to override.
+  @override
+  bool get assignContext => _assignContext ?? _autoDispose;
 }

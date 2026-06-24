@@ -158,6 +158,15 @@ abstract class ListenableWidget<T extends ViewModel> extends StatefulWidget {
   /// provided.
   bool get autoDispose => viewModel == null;
 
+  /// Whether the widget assigns its [BuildContext] to [ViewModel.context]
+  /// during initialization.
+  ///
+  /// Defaults to `true`, except when a pre-built [viewModel] is provided — in
+  /// that case the default is `false`, because a shared ViewModel should not
+  /// have its context overwritten by every widget that uses it. Override to
+  /// force a specific value regardless of how the ViewModel was provided.
+  bool get assignContext => viewModel == null;
+
   @override
   State<ListenableWidget> createState() => _ListenableWidgetState<T>();
 }
@@ -170,7 +179,7 @@ class _ListenableWidgetState<T extends ViewModel>
   void initState() {
     super.initState();
     viewModel = widget.create(context);
-    viewModel.context = context;
+    if (widget.assignContext) viewModel.context = context;
   }
 
   @override

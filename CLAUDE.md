@@ -64,8 +64,10 @@ Two optional hooks mirror the `State` lifecycle:
 - **`onDependenciesChanged(context, viewModel)`** — maps to `didChangeDependencies`.
 
 The `autoDispose` getter controls whether the ViewModel is disposed when the
-widget leaves the tree. Default is `true`, except `false` when a pre-built
-`viewModel` is supplied.
+widget leaves the tree. The `assignContext` getter controls whether the widget
+assigns its `BuildContext` to the (nullable) `ViewModel.context`. Both default to
+`true`, except `false` when a pre-built `viewModel` is supplied — a shared
+ViewModel is neither disposed nor has its context overwritten by each user.
 
 `ListenableWidgetBuilder<T>` is an inline (no-subclass) variant.
 

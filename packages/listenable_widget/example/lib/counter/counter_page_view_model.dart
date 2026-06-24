@@ -15,9 +15,14 @@ class CounterPageViewModel extends ViewModel {
     _count += _incrementValue;
     notifyListeners();
     if (_count % 10 == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You reached $_count!')),
-      );
+      // context is nullable and only valid while the assigning widget is
+      // mounted, so null-check before use.
+      final ctx = context;
+      if (ctx != null && ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('You reached $_count!')),
+        );
+      }
     }
   }
 

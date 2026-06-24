@@ -104,3 +104,20 @@ class HomePage extends GetItListenableWidget<HomeViewModel, void, void> {
   Widget build(BuildContext context, HomeViewModel vm) => /* ... */;
 }
 ```
+
+## `ViewModel.context` and shared instances (`assignContext`)
+
+`ListenableWidget` assigns its `BuildContext` to `ViewModel.context` on init. For
+a **shared** singleton resolved by several widgets, that would mean each widget
+overwrites the context the others set. To avoid this, `assignContext` defaults to
+`autoDispose`: a widget-owned factory instance gets its context assigned, a shared
+singleton (`autoDispose: false`) does not. Override it explicitly if you need the
+other behaviour:
+
+```dart
+// Single widget owns the instance but disposes it elsewhere — keep context:
+super(autoDispose: false, assignContext: true);
+```
+
+Because of this, `ViewModel.context` is nullable — always null-check it before
+use (`if (context case final ctx?) ...`).

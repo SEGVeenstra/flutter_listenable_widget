@@ -13,7 +13,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  listenable_widget: ^0.2.0
+  listenable_widget: ^0.3.0
   get_it: ^9.0.0
 
 dev_dependencies:

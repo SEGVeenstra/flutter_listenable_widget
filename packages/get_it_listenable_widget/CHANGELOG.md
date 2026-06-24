@@ -7,3 +7,6 @@
 - `GetItListenableWidgetBuilder<VM, P1, P2>` — inline builder variant.
 - `autoDispose` defaults to `true` (widget owns the ViewModel); pass `false`
   for shared singletons.
+- `assignContext` controls whether the widget assigns its `BuildContext` to
+  `ViewModel.context`. Defaults to `autoDispose`, so shared singletons do not
+  have their context overwritten; pass it explicitly to override.

@@ -27,6 +27,7 @@ class GetItListenableWidgetBuilder<VM extends ViewModel, P1, P2>
     super.instanceName,
     super.getIt,
     super.autoDispose,
+    super.assignContext,
     super.key,
   });
 

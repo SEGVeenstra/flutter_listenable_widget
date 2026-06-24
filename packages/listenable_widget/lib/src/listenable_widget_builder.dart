@@ -30,6 +30,7 @@ class ListenableWidgetBuilder<T extends ViewModel> extends ListenableWidget<T> {
       onWidgetChangedCallback;
   final void Function(BuildContext, T)? onDependenciesChangedCallback;
   final bool? _autoDispose;
+  final bool? _assignContext;
 
   const ListenableWidgetBuilder({
     super.viewModelFactory,
@@ -38,12 +39,14 @@ class ListenableWidgetBuilder<T extends ViewModel> extends ListenableWidget<T> {
     this.onWidgetChangedCallback,
     this.onDependenciesChangedCallback,
     bool? autoDispose,
+    bool? assignContext,
     super.key,
   })  : assert(
           viewModelFactory != null || viewModel != null,
           'ListenableWidgetBuilder requires viewModelFactory or viewModel.',
         ),
-        _autoDispose = autoDispose;
+        _autoDispose = autoDispose,
+        _assignContext = assignContext;
 
   @override
   Widget build(BuildContext context, T viewModel) => builder(context, viewModel);
@@ -64,4 +67,9 @@ class ListenableWidgetBuilder<T extends ViewModel> extends ListenableWidget<T> {
   /// That default is `false` when [viewModel] is provided, `true` otherwise.
   @override
   bool get autoDispose => _autoDispose ?? super.autoDispose;
+
+  /// Falls back to [ListenableWidget.assignContext] when not explicitly set.
+  /// That default is `false` when [viewModel] is provided, `true` otherwise.
+  @override
+  bool get assignContext => _assignContext ?? super.assignContext;
 }
