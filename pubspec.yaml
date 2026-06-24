@@ -1,20 +1,29 @@
-name: listenable_widget
-description: "A widget that listens to a ChangeNotifier and rebuilds when it changes."
-version: 0.2.0
-homepage: "https://seg.veenstra.dev"
+name: listenable_widget_workspace
+publish_to: none
 repository: "https://github.com/SEGVeenstra/flutter_listenable_widget"
 
+# Dart pub workspace root. Melos 8 requires Dart >=3.9; this floor is dev-only
+# and is never published into the individual packages (they keep ^3.8.1).
 environment:
-  sdk: ^3.8.1
-  flutter: ">=3.27.0"
+  sdk: ^3.9.0
 
-dependencies:
-  flutter:
-    sdk: flutter
+workspace:
+  - packages/listenable_widget
+  - packages/listenable_widget/example
+  - packages/get_it_listenable_widget
+  - packages/get_it_listenable_widget/example
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^5.0.0
+  melos: ^8.0.0
 
-flutter:
+melos:
+  command:
+    version:
+      linkToCommits: true
+  scripts:
+    analyze:
+      run: melos exec -- dart analyze .
+    test:
+      run: melos exec --dir-exists=test -- flutter test
+    format-check:
+      run: melos exec -- dart format --set-exit-if-changed .

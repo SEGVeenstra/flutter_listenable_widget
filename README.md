@@ -1,171 +1,59 @@
-# ListenableWidget
+# listenable_widget monorepo
 
-A conviniënt widget that helps you separate UI from Logic, using [ChangeNotifiers](https://api.flutter.dev/flutter/foundation/ChangeNotifier-class.html).
+A small MVVM construction set for Flutter, built on the framework's own
+`ChangeNotifier` and `ListenableBuilder` — no codegen, no new state-management
+runtime. This repository is a [Melos](https://melos.invertase.dev) / Dart
+pub-workspace monorepo containing two independently published packages.
 
-## Goal
+## Packages
 
-The aim for this package is provide a simple way of separating UI from Logic while maintaining the simplicity of `StatefulWidget`.
+| Package | pub.dev | Description |
+| --- | --- | --- |
+| [`listenable_widget`](packages/listenable_widget) | [![pub](https://img.shields.io/pub/v/listenable_widget.svg)](https://pub.dev/packages/listenable_widget) | The core `ListenableWidget` / `ViewModel` MVVM widgets. No runtime deps beyond `flutter`. |
+| [`get_it_listenable_widget`](packages/get_it_listenable_widget) | [![pub](https://img.shields.io/pub/v/get_it_listenable_widget.svg)](https://pub.dev/packages/get_it_listenable_widget) | A `ListenableWidget` that resolves its ViewModel from [GetIt](https://pub.dev/packages/get_it). Depends on `listenable_widget` + `get_it`. |
 
-In general, a `StatefulWidget` is structured with both the `Widget` and the `State` in the same file. The function that builds the UI is located inside the `State`.
+Use `listenable_widget` on its own; reach for `get_it_listenable_widget` when you
+already wire your ViewModels through GetIt/Injectable and want them resolved for
+you. See each package's README for full usage.
 
-`ListenableWidget` 'fixes' this by having you to override a `build` method which passes the `ViewModel`.
-
-## Usage
-
-This package is designed to fullfill the VVM of MVVM, where the `ListenableWidget` is the View and the `ChangeNotifier` serves as the `ViewModel`.
-
-A typical implementation will exist of two parts:
-
-### ViewModel
-
-We start with creating our `ViewModel` which must be a `ChangeNotifier`. Whenever we call `notifyListeners()` on our `ViewModel`, the `ListenableWidget` will rebuild.
+## Quick taste
 
 ```dart
-class CounterViewModel with ChangeNotifier {
-    // While it's not required, using the private + public getter combo
-    // prevents consumers from accidently circumventing any notifyListeners.
-    int _count = 0;
-    int get count => _count;
+class CounterPage extends ListenableWidget<CounterViewModel> {
+  @override
+  CounterViewModel create(BuildContext context) => CounterViewModel();
 
-    void increment() {
-        _count++;
-        notifyListeners();
-    }
+  @override
+  Widget build(BuildContext context, CounterViewModel vm) =>
+      TextButton(onPressed: vm.increment, child: Text('${vm.count}'));
 }
 ```
 
-### View
+## Development
 
-Next we can create our View. We do this by extending `ListenableWidget` and override at least the two required methods, `create` and `build`:
+This repo uses Dart pub workspaces; one `flutter pub get` at the root links every
+package and example.
 
-```dart
-class CounterView extends ListenableWidget<CounterViewModel> {
+```bash
+flutter pub get                    # resolve the whole workspace
+flutter analyze                    # analyze everything
+dart run melos run test            # per-package tests (where test/ exists)
 
-    @override
-    CounterViewModel create(context) {
-        return CounterViewModel();
-    }
+# Run an example
+cd packages/listenable_widget/example && flutter run
+cd packages/get_it_listenable_widget/example && flutter run
 
-    @override
-    void build(context, viewModel) {
-        return Scaffold(
-            // imagine beautiful UI here
-            Text(viewModel.count)
-            // imagine beautiful UI here
-            IncrementButton( onPressed: viewModel.increment),
-            // imagine beautiful UI here
-        );
-    }
-}
+# Release (independent versioning, conventional commits)
+dart run melos version
+dart run melos publish --dry-run   # drop --dry-run to publish
 ```
 
-## Methods overview
+> **Release ordering:** `get_it_listenable_widget` depends on `listenable_widget`
+> via a hosted constraint, so when both change in one release, publish
+> `listenable_widget` first.
 
-The `ListenableWidget` has four methods of which two are required.
+See [`CLAUDE.md`](CLAUDE.md) for the full architecture and contributor notes.
 
-### create (required)
+## License
 
-Whenever you extend `ListenableWidget`, you must override `create` to provide a `ViewModel`. This will only be called once, when the `Widget` is created.
-
-Often you will use this to create a new instance of the `ViewModel` but it's also possible to provide an already existing `ViewModel`, like when you want to share state between pages.
-
-```dart
-// Example of creating a new instance
-@override
-MyViewModel create(context) {
-    return MyViewModel(initialValue);
-}
-
-// Example of getting an existing ViewModel using Provider
-@override
-MyViewModel create(context) {
-    return context.read<MyViewModel>();
-}
-```
-
-### build (required)
-
-The other required method to override is `build`. The `build` method should return your UI. It works similar to the `build` method you're used to from `StatelessWidget` and `StatefulWidget`, but has one extra argument which is the `ViewModel`.
-
-The `build` method will be called every time `notifyListeners()` is called on the `ViewModel`.
-
-```dart
-@override
-Widget build(context, viewModel) {
-    return MyWidget(
-        onTap: viewModel.doSomething,
-        value: viewModel.currentValue,
-    );
-}
-```
-
-### onWidgetChanged (optional)
-
-The `onWidgetChanged` method is called whenever the `Widget` is updated with a new configuration. Because the `ViewModel` only gets created once, you can use `onWidgetChanged` to update the `ViewModel`. This is useful when your `Widget` has fields that can be updated by its parent and which should be reflected in the `ViewModel`.
-
-```dart
-class CounterWidget extends ListenableWidget<CounterViewModel> {
-    // The parent passes a counterMode
-    CounterWidget(this.counterMode);
-
-    final CounterMode counterMode; 
-
-    @override
-    CounterViewModel create(context) {
-        // When the Widget is first created, it will use
-        // the counterMode during creation.
-        return CounterViewModel(initialCounterMode: counterMode);
-    }
-
-    @override
-    void onWidgetChanged(context, oldWidget, viewModel) {
-        // When the widget is updated by the parent, this is called.
-        // We then check if the counterMode has changed, if so,
-        // we update it on the ViewModel.
-        if(oldWidget.counterMode != counterMode) {
-            viewModel.updateCounterMode(counterMode);
-        }
-    }
-
-    @override
-    Widget build(context, viewModel) {
-        // UI
-    }
-}
-```
-
-### onDependenciesChanged (optional)
-
-The `onDependenciesChanged` method is called whenever the widget's dependencies change (such as InheritedWidgets). This can be used to update the `ViewModel` or perform any necessary actions when the dependencies change.
-
-```dart
-@override
-void onDependenciesChanged(context, viewModel) {
-    // React to dependency changes
-    final theme = Theme.of(context);
-    viewModel.updateTheme(theme);
-}
-```
-
-## Disposing
-
-By default, `ListenableWidget` will call `dispose` on the `ViewModel` when the `Widget` is disposed so you can clean-up. This should be fine in most cases.
-
-If you have a `Widget` that does __not__ create an instance of the `ViewModel`, but get's it from somewhere else, this most likely means that you __don't__ want your `Widget` to dispose the `ViewModel` either.
-
-In this case you can simply override the `autoDispose` property on your widget to return false.
-
-```dart
-@override
-final autoDispose = false;
-```
-
-## Additional information
-
-This package is aimes for simplicity and that's why you don't find certain things you might find in other state management libraries.
-
-If you wish to optimize rebuilds, it's up to you to do so by calling `notifyListeners()` strategically.
-
-In general, you'd want `ListenableWidget` to instantiate it's own `ViewModel`. For more complex scenarios where you wish to share `ViewModels` you will have to manage that yourself, for example by using [Provider](https://pub.dev/packages/provider).
-
-This package has ironically been born from the desire to __not__ use a package for state management. So if you don't want to rely on a package either, you can also just copy [listenable_widget.dart](https://github.com/SEGVeenstra/flutter_listenable_widget/blob/master/lib/src/listenable_widget.dart) into your project.
+See [LICENSE](LICENSE).
