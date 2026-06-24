@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-abstract class ListenableWidget<T extends ChangeNotifier>
+import 'view_model.dart';
+
+abstract class ListenableWidget<T extends ViewModel>
     extends StatefulWidget {
   const ListenableWidget({super.key});
 
@@ -37,7 +39,7 @@ abstract class ListenableWidget<T extends ChangeNotifier>
   State<ListenableWidget> createState() => _ListenableWidgetState<T>();
 }
 
-class _ListenableWidgetState<T extends ChangeNotifier>
+class _ListenableWidgetState<T extends ViewModel>
     extends State<ListenableWidget<T>> {
   late final T viewModel;
 
@@ -45,6 +47,7 @@ class _ListenableWidgetState<T extends ChangeNotifier>
   void initState() {
     super.initState();
     viewModel = widget.create(context);
+    viewModel.context = context;
   }
 
   @override

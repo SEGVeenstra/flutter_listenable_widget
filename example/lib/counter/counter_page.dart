@@ -21,6 +21,7 @@ class CounterPage extends ListenableWidget<CounterPageViewModel> {
     viewModel.setIncrementValue(incrementValue);
   }
 
+  @override
   void onDependenciesChanged(
     BuildContext context,
     CounterPageViewModel viewModel,

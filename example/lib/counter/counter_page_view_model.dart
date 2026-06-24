@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:listenable_widget/listenable_widget.dart';
 
-class CounterPageViewModel with ChangeNotifier {
+class CounterPageViewModel extends ViewModel {
   CounterPageViewModel({int incrementValue = 1})
     : _incrementValue = incrementValue;
 
@@ -11,21 +12,17 @@ class CounterPageViewModel with ChangeNotifier {
   int get count => _count;
 
   void incrementCounter() {
-    // Here we update the ViewModel and notify its listeners.
-    // This will trigger the ListenableWidget to call the buildView method again.
     _count += _incrementValue;
     notifyListeners();
+    if (_count % 10 == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You reached $_count!')),
+      );
+    }
   }
 
   void setIncrementValue(int value) {
     _incrementValue = value;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    // Here we can clean up any resources if needed.
-    // ListenableWidget will automatically call this method when the widget is disposed.
-    super.dispose();
   }
 }
