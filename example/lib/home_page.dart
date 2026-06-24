@@ -7,8 +7,29 @@ import 'package:example/counter/simple_counter_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:listenable_widget/listenable_widget.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // A single ViewModel instance shared between two widgets (variant C).
+  // Lifecycle is managed here, so autoDispose is false on both widgets.
+  late final SimpleCounterViewModel _sharedViewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _sharedViewModel = SimpleCounterViewModel();
+  }
+
+  @override
+  void dispose() {
+    _sharedViewModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +66,56 @@ class HomePage extends StatelessWidget {
               onIncrement: vm.increment,
             ),
           ),
+
+          const _SectionDivider('Variant C – Pre-built instance (shared lifecycle)'),
+
+          // Variant C — two widgets share the same ViewModel instance.
+          // Incrementing either card updates both because they listen to the
+          // same ChangeNotifier. autoDispose is false automatically.
+          ListenableWidgetBuilder<SimpleCounterViewModel>(
+            viewModel: _sharedViewModel,
+            builder: (ctx, vm) => CounterCardUi(
+              title: 'Shared counter – widget A',
+              description:
+                  'Pre-built ViewModel passed via viewModel. autoDispose is '
+                  'false automatically; the parent owns the lifecycle.',
+              count: vm.count,
+              onIncrement: vm.increment,
+            ),
+          ),
+
+          ListenableWidgetBuilder<SimpleCounterViewModel>(
+            viewModel: _sharedViewModel,
+            builder: (ctx, vm) => CounterCardUi(
+              title: 'Shared counter – widget B',
+              description:
+                  'Same ViewModel instance as widget A. Increment either card '
+                  'and both update in sync.',
+              count: vm.count,
+              onIncrement: vm.increment,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionDivider extends StatelessWidget {
+  final String label;
+
+  const _SectionDivider(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Text(
+        label,
+        style: Theme.of(context)
+            .textTheme
+            .labelMedium
+            ?.copyWith(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }

@@ -8,9 +8,19 @@ import 'view_model.dart';
 /// dedicated subclass is not worth it — similar to how Flutter's own
 /// [ListenableBuilder] avoids subclassing [StatefulWidget].
 ///
+/// Provide the ViewModel via [viewModelFactory] (creates a new instance) or
+/// [viewModel] (reuses an existing instance, [autoDispose] defaults to `false`).
+///
 /// ```dart
+/// // Factory — widget owns the lifecycle:
 /// ListenableWidgetBuilder<CounterViewModel>(
 ///   viewModelFactory: (_) => CounterViewModel(),
+///   builder: (ctx, vm) => Text('${vm.count}'),
+/// )
+///
+/// // Pre-built instance — caller owns the lifecycle:
+/// ListenableWidgetBuilder<CounterViewModel>(
+///   viewModel: sharedVm,
 ///   builder: (ctx, vm) => Text('${vm.count}'),
 /// )
 /// ```
@@ -19,17 +29,21 @@ class ListenableWidgetBuilder<T extends ViewModel> extends ListenableWidget<T> {
   final void Function(BuildContext, ListenableWidget<T>, T)?
       onWidgetChangedCallback;
   final void Function(BuildContext, T)? onDependenciesChangedCallback;
-  final bool _autoDispose;
+  final bool? _autoDispose;
 
   const ListenableWidgetBuilder({
-    required T Function(BuildContext) viewModelFactory,
+    super.viewModelFactory,
+    super.viewModel,
     required this.builder,
     this.onWidgetChangedCallback,
     this.onDependenciesChangedCallback,
-    bool autoDispose = true,
+    bool? autoDispose,
     super.key,
-  })  : _autoDispose = autoDispose,
-        super(viewModelFactory: viewModelFactory);
+  })  : assert(
+          viewModelFactory != null || viewModel != null,
+          'ListenableWidgetBuilder requires viewModelFactory or viewModel.',
+        ),
+        _autoDispose = autoDispose;
 
   @override
   Widget build(BuildContext context, T viewModel) => builder(context, viewModel);
@@ -46,6 +60,8 @@ class ListenableWidgetBuilder<T extends ViewModel> extends ListenableWidget<T> {
   void onDependenciesChanged(BuildContext context, T viewModel) =>
       onDependenciesChangedCallback?.call(context, viewModel);
 
+  /// Falls back to [ListenableWidget.autoDispose] when not explicitly set.
+  /// That default is `false` when [viewModel] is provided, `true` otherwise.
   @override
-  bool get autoDispose => _autoDispose;
+  bool get autoDispose => _autoDispose ?? super.autoDispose;
 }

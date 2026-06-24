@@ -83,21 +83,52 @@ import 'view_model.dart';
 ///   builder: (ctx, vm) => Text('${vm.count}'),
 /// )
 /// ```
+///
+/// ### C — Pre-built instance: pass `viewModel`
+/// Pass an already-created ViewModel when its lifecycle is managed externally
+/// (e.g. by a DI framework or a parent widget). [autoDispose] is automatically
+/// `false` so the widget never disposes an instance it does not own.
+///
+/// ```dart
+/// // Parent manages the lifecycle:
+/// final sharedVm = MyViewModel();
+///
+/// // Two widgets share the same instance — both react to notifyListeners():
+/// MyWidget(viewModel: sharedVm)
+/// MyWidget(viewModel: sharedVm)
+/// ```
 abstract class ListenableWidget<T extends ViewModel> extends StatefulWidget {
   /// Optional factory that creates the ViewModel. When provided, [create] uses
   /// this factory and subclasses do not need to override [create].
   final T Function(BuildContext)? viewModelFactory;
 
-  const ListenableWidget({this.viewModelFactory, super.key});
+  /// A pre-built ViewModel instance. When provided, [create] returns this
+  /// instance directly and [autoDispose] defaults to `false`.
+  ///
+  /// Use this when the ViewModel's lifecycle is managed externally — for
+  /// example to share one ViewModel across multiple widgets.
+  /// Do not provide both [viewModel] and [viewModelFactory].
+  final T? viewModel;
+
+  const ListenableWidget({
+    this.viewModelFactory,
+    this.viewModel,
+    super.key,
+  }) : assert(
+          viewModel == null || viewModelFactory == null,
+          'Provide either viewModel or viewModelFactory, not both.',
+        );
 
   /// Creates and returns the [T] instance. Called once during initialization.
   ///
-  /// Override this method **or** supply [viewModelFactory] to the constructor.
-  /// Throws [UnimplementedError] if neither is provided.
+  /// Override this method **or** supply [viewModelFactory] or [viewModel] to
+  /// the constructor. Throws [UnimplementedError] if none of the three is used.
   T create(BuildContext context) {
+    if (viewModel != null) return viewModel!;
     if (viewModelFactory != null) return viewModelFactory!(context);
     throw UnimplementedError(
-      '$runtimeType must either override create() or provide viewModelFactory.',
+      '$runtimeType must either override create(), provide viewModelFactory, '
+      'or provide viewModel.',
     );
   }
 
@@ -121,9 +152,11 @@ abstract class ListenableWidget<T extends ViewModel> extends StatefulWidget {
 
   /// Whether the widget should automatically dispose of the [viewModel].
   ///
-  /// Defaults to `true`. Set to `false` when the ViewModel's lifecycle is
-  /// managed externally (e.g. via a dependency injection framework).
-  bool get autoDispose => true;
+  /// Defaults to `true`, except when [viewModel] is provided — in that case
+  /// the default is `false` because the caller owns the lifecycle.
+  /// Override to force a specific value regardless of how the ViewModel was
+  /// provided.
+  bool get autoDispose => viewModel == null;
 
   @override
   State<ListenableWidget> createState() => _ListenableWidgetState<T>();
