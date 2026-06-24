@@ -56,4 +56,4 @@ See [`CLAUDE.md`](CLAUDE.md) for the full architecture and contributor notes.
 
 ## License
 
-See [LICENSE](packages/listenable_widget/LICENSE).
+See [LICENSE](LICENSE).
